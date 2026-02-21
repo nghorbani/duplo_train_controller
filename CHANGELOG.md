@@ -12,7 +12,8 @@ All notable changes to this project (forked from [mav00/LDTrainRemote](https://g
 - Added potentiometer calibration constants (POT_MIN, POT_MAX) with inverted normalized 0-1000 range
 - Added center dead zone (400-599 normalized) for reliable neutral/stop position
 - Added minimum motor speed threshold (SPEED_MIN=20) to prevent stalling at low speeds
-- Added potentiometer blocking mechanism on stop button press (unblocks when pot moves 10+ units)
+- Added STOP_UNBLOCK_THRESHOLD configuration constant (default 20) for emergency stop resume sensitivity
+- Added potentiometer blocking mechanism on stop button press (unblocks when pot moves STOP_UNBLOCK_THRESHOLD+ units)
 - Added periodic BLE command resend every 500ms while motor is running
 - Added brake sound effect when decelerating to stop via potentiometer
 - Added comprehensive serial debug output (raw/filtered ADC, voltage, min/max tracking, BLE status)
