@@ -6,8 +6,8 @@ for horn, LED colour, water refill sound, and emergency stop.
 
 This is the codebase for the Lego Duplo Train controller project. The 3D-printed remote enclosure is available on:
 
-- **MakerWorld:** <https://makerworld.com/en/models/462749-remote-compatible-with-brick-duplo-train-on-esp32?from=search#profileId-716511>
-- **Thingiverse:** <https://www.thingiverse.com/thing:6620027>
+- [MakerWorld](https://makerworld.com/en/models/462749-remote-compatible-with-brick-duplo-train-on-esp32?from=search#profileId-716511)
+- [Thingiverse](https://www.thingiverse.com/thing:6620027)
 
 ## Hardware
 
