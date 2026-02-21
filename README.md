@@ -4,9 +4,10 @@ An ESP32-based BLE remote controller for the LEGO Duplo Train. Uses a
 potentiometer for variable speed (forward / stop / reverse) and four buttons
 for horn, LED colour, water refill sound, and emergency stop.
 
-This is the code for the 3D-printed remote enclosure available on MakerWorld:
+This is the codebase for the Lego Duplo Train controller project. The 3D-printed remote enclosure is available on:
 
-<https://makerworld.com/en/models/462749-remote-compatible-with-brick-duplo-train-on-esp32?from=search#profileId-716511>
+- **MakerWorld:** <https://makerworld.com/en/models/462749-remote-compatible-with-brick-duplo-train-on-esp32?from=search#profileId-716511>
+- **Thingiverse:** <https://www.thingiverse.com/thing:6620027>
 
 ## Hardware
 
@@ -21,6 +22,18 @@ This is the code for the 3D-printed remote enclosure available on MakerWorld:
 
 All buttons use the ESP32 internal pull-up resistors (`INPUT_PULLUP`), so
 each button should connect its pin to GND when pressed.
+
+## Features
+
+- **Continuous speed control** — potentiometer mapped to forward / stop / reverse with smooth ramping (speed range `SPEED_MIN` to 64)
+- **Adaptive analog smoothing** — ResponsiveAnalogRead library filters ADC noise for jitter-free input
+- **Center dead zone** — a configurable band around the midpoint where speed is zero, preventing accidental movement
+- **Emergency stop with pot-lock** — the stop button immediately halts the motor; the potentiometer stays locked until moved past a configurable threshold (`STOP_UNBLOCK_THRESHOLD`)
+- **Inactivity auto-sleep** — after 10 minutes of no input the controller stops the train, shuts down BLE, and puts the ESP32 into deep sleep to save battery
+- **Steam sound at max speed** — plays a horn sound when the motor reaches full throttle (once per acceleration cycle)
+- **BLE command resending** — periodically resends motor commands to guard against dropped BLE packets
+- **Modular codebase** — split from the original monolithic `main.cpp` into focused modules: `train_control`, `buttons`, `power`, and shared `config`/`pins` headers
+- **Centralized configuration** — all tunable parameters (pot calibration, timeouts, thresholds, pin assignments) live in `include/config.h`
 
 ## Programming (VSCode + PlatformIO)
 
@@ -41,8 +54,8 @@ each button should connect its pin to GND when pressed.
 
 ## Configuration
 
-All configuration is done via `#define` constants at the top of
-`src/main.cpp`. After changing any value, re-upload the firmware.
+All configuration is done via `#define` constants in
+`include/config.h`. After changing any value, re-upload the firmware.
 
 ### POT_MIN / POT_MAX (Potentiometer ADC Range)
 
@@ -56,7 +69,7 @@ range, so `POT_MIN` and `POT_MAX` define the actual endpoints.
 3. Watch the `Min:` and `Max:` values in the debug output -- these are the
    observed raw ADC extremes.
 4. Replace `POT_MIN` with the observed minimum and `POT_MAX` with the observed
-   maximum in `src/main.cpp`, then re-upload.
+   maximum in `include/config.h`, then re-upload.
 
 Default values: `POT_MIN = 400`, `POT_MAX = 2300`.
 

@@ -3,6 +3,16 @@
 All notable changes to this project (forked from [mav00/LDTrainRemote](https://github.com/mav00/LDTrainRemote)) are documented in this file.
 
 ## [Unreleased]
+- Refactored monolithic main.cpp into separate modules: config.h, pins.h, power.h/.cpp, train_control.h/.cpp, buttons.h/.cpp
+- Moved all tunable #define constants into include/config.h for single-file configuration
+- Moved pin assignments and hardware extern declarations into include/pins.h
+- Extracted inactivity tracking and deep sleep logic into power module (src/power.cpp)
+- Extracted potentiometer reading, speed mapping, and motor control into train_control module (src/train_control.cpp)
+- Extracted button handling and LED color cycling into buttons module (src/buttons.cpp)
+- Decomposed 110-line handlePoti() into focused helper functions (readAndNormalizePot, checkPotUnblock, sendMotorCommand, updateSteamSound, trackPotActivity, printDebug)
+- Replaced magic numbers (25ms debounce, 20ms loop delay) with named constants BUTTON_DEBOUNCE_MS and LOOP_DELAY_MS
+- Updated README.md to reference include/config.h instead of src/main.cpp for configuration
+- Changed departure sound from STATION_DEPARTURE to HORN for consistency with music button
 - Added inactivity auto-off: ESP32 enters deep sleep after 10 minutes of no button presses or potentiometer movement; stops the train motor and shuts down the LEGO hub via BLE before sleeping (power-cycle to restart)
 - Added steam / choo-choo sound (DuploTrainBaseSound::STEAM) that plays once when potentiometer reaches maximum forward speed; re-arms after pot returns to dead zone
 - Added INACTIVITY_TIMEOUT_MS and POT_ACTIVITY_THRESHOLD configuration constants
