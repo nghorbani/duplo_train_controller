@@ -26,6 +26,7 @@
 #include <Lpf2HubConst.h> //legoino
 #include <Bounce2.h>      //bounce2
 #include <ResponsiveAnalogRead.h>
+#include <esp_sleep.h>
 
 Lpf2Hub myHub;
 byte port = (byte)PoweredUpHubPort::A;
@@ -51,6 +52,11 @@ ResponsiveAnalogRead potReader(PTI_SPEED, true);
 #define POT_MAX 2300  // ADC value when handle is fully BACKWARD
 #define POT_REVERSED false  // Set to true if potentiometer GND/VCC are swapped
 #define SPEED_MIN 20  // Minimum motor speed (both directions); range: SPEED_MIN..64
+#define STOP_UNBLOCK_THRESHOLD 20  // speed-unit change needed to resume after emergency stop
+
+// Inactivity auto-off configuration
+#define INACTIVITY_TIMEOUT_MS  (10UL * 60UL * 1000UL)  // 10 minutes
+#define POT_ACTIVITY_THRESHOLD 15  // minimum speed-unit change to count as pot movement
 
 // Debug tracking
 int debugRawMin = 4095;
@@ -65,6 +71,34 @@ static short gColor = NONE;
 static int gSpeed = 0;
 static bool potBlocked = false;
 static int speedAtBlock = 0;
+
+// Inactivity tracking
+static unsigned long lastActivityTime = 0;
+static int lastActivitySpeed = 0;
+
+// Max-speed steam sound: plays once at full forward, re-arms when pot returns to dead zone
+static bool steamPlayed = false;
+
+void resetActivityTimer() {
+    lastActivityTime = millis();
+}
+
+void enterDeepSleep() {
+    Serial.println("[SLEEP] Inactivity timeout. Shutting down...");
+
+    if (myHub.isConnected()) {
+        myHub.setBasicMotorSpeed(port, 0);
+        delay(200);
+        myHub.playSound((byte)DuploTrainBaseSound::BRAKE);
+        delay(500);
+        myHub.shutDownHub();
+        delay(500);
+    }
+
+    Serial.println("[SLEEP] Entering deep sleep. Power-cycle to restart.");
+    Serial.flush();
+    esp_deep_sleep_start();
+}
 
 void handlePoti()
 {
@@ -105,7 +139,7 @@ void handlePoti()
 
   if (potBlocked)
   {
-    if (abs(speed - speedAtBlock) >= 10)
+    if (abs(speed - speedAtBlock) >= STOP_UNBLOCK_THRESHOLD)
     {
       potBlocked = false;  // Pot moved enough — unblock
     }
@@ -152,6 +186,21 @@ void handlePoti()
     bleStatus = "resent";
   }
 
+  // Play steam sound once when pot reaches max forward; re-arms after returning to dead zone
+  if (speed >= 64 && !steamPlayed) {
+    myHub.playSound((byte)DuploTrainBaseSound::STEAM);
+    delay(100);
+    steamPlayed = true;
+  } else if (speed == 0) {
+    steamPlayed = false;
+  }
+
+  // Detect potentiometer movement for inactivity tracking
+  if (abs(speed - lastActivitySpeed) >= POT_ACTIVITY_THRESHOLD) {
+    lastActivitySpeed = speed;
+    resetActivityTimer();
+  }
+
   // Debug output every DEBUG_INTERVAL ms
   if (now - lastDebugPrint >= DEBUG_INTERVAL)
   {
@@ -186,6 +235,7 @@ void handleButtons()
   {
     if(pbMusic.fell())
     {
+      resetActivityTimer();
       myHub.playSound((byte)DuploTrainBaseSound::HORN);
       delay(100);
     }
@@ -194,6 +244,7 @@ void handleButtons()
   {
     if(pbLight.fell())
     {
+      resetActivityTimer();
       myHub.setLedColor(getNextColor());
       delay(100);
     }
@@ -202,14 +253,16 @@ void handleButtons()
   {
     if(pbWater.fell())
     {
+      resetActivityTimer();
       myHub.playSound((byte)DuploTrainBaseSound::WATER_REFILL);
-      delay(100);  
+      delay(100);
     }
   }
   if(pbStop.update())
   {
     if(pbStop.fell())
     {
+      resetActivityTimer();
       potBlocked = true;
       speedAtBlock = gSpeed;
       gSpeed = 0;
@@ -244,9 +297,16 @@ void setup() {
   Serial.printf("POT_REVERSED: %s\n", POT_REVERSED ? "true" : "false");
   Serial.println("If these don't match your pot, update POT_MIN/POT_MAX in code.");
   Serial.println("=======================");
+
+  lastActivityTime = millis();
 }
 
 void loop() {
+
+    // Auto-off after inactivity
+    if (millis() - lastActivityTime >= INACTIVITY_TIMEOUT_MS) {
+        enterDeepSleep();
+    }
 
     if (myHub.isConnecting()) {
         myHub.connectHub();

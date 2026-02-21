@@ -3,6 +3,9 @@
 All notable changes to this project (forked from [mav00/LDTrainRemote](https://github.com/mav00/LDTrainRemote)) are documented in this file.
 
 ## [Unreleased]
+- Added inactivity auto-off: ESP32 enters deep sleep after 10 minutes of no button presses or potentiometer movement; stops the train motor and shuts down the LEGO hub via BLE before sleeping (power-cycle to restart)
+- Added steam / choo-choo sound (DuploTrainBaseSound::STEAM) that plays once when potentiometer reaches maximum forward speed; re-arms after pot returns to dead zone
+- Added INACTIVITY_TIMEOUT_MS and POT_ACTIVITY_THRESHOLD configuration constants
 - Added ResponsiveAnalogRead library for adaptive potentiometer smoothing
 - Added continuous speed mapping (SPEED_MIN..64) replacing discrete threshold steps (64, 32, 16, 0, -32, -64)
 - Added reversed potentiometer mapping (low ADC = full forward, high ADC = full backward) to match physical handle direction

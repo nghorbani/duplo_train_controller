@@ -13,7 +13,7 @@ This is the code for the 3D-printed remote enclosure available on MakerWorld:
 | Component        | Details |
 |------------------|---------|
 | **Board**        | BT 2.4G WLAN-Modul ESP32-32 CP2102 USB Micro ([AliExpress](https://de.aliexpress.com/item/1005006987264613.html?spm=a2g0o.order_list.order_list_main.5.30555c5fLBoiG0&gatewayAdapt=glo2deu)) |
-| **Potentiometer**| Linear pot connected to **pin 15** |
+| **Potentiometer**| ([10K Linear pot](https://de.aliexpress.com/item/1005007593151146.html?spm=a2g0o.order_list.order_list_main.29.1d535c5fEI0K7B&gatewayAdapt=glo2deu)) connected to **pin 15** |
 | **BTN_MUSIC**    | Momentary push-button on **pin 18** -- horn sound |
 | **BTN_LICHT**    | Momentary push-button on **pin 19** -- cycle LED colour |
 | **BTN_WASSER**   | Momentary push-button on **pin 22** -- water refill sound |
@@ -92,6 +92,18 @@ The normalised potentiometer range (0--1000) is split into three regions:
 
 The dead zone in the centre prevents accidental movement when the handle is
 near the midpoint.
+
+### STOP_UNBLOCK_THRESHOLD (Emergency Stop Resume Sensitivity)
+
+After the emergency stop button is pressed, the potentiometer is locked until
+the calculated speed changes by at least `STOP_UNBLOCK_THRESHOLD` units from
+the speed at the moment of the stop. This prevents accidental resumption from
+minor potentiometer drift.
+
+Increase for a larger "dead zone" after stop (safer but requires more handle
+movement to resume); decrease for quicker re-engagement.
+
+Default: `20` (speed range is -64 to 64).
 
 ### Pin Assignments
 
