@@ -74,6 +74,7 @@ void loop() {
         myHub.connectHub();
         if (myHub.isConnected()) {
             Serial.println("We are now connected to the HUB");
+            applyStopMode();
         } else {
             Serial.println("We have failed to connect to the HUB");
         }

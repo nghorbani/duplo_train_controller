@@ -2,6 +2,13 @@
 
 All notable changes to this project (forked from [mav00/LDTrainRemote](https://github.com/mav00/LDTrainRemote)) are documented in this file.
 
+## [v1.1.0] - 2026-02-26
+- Fixed stop mode on initial BLE connect: throttle block now captures the actual current throttle position (not a hardcoded 0), preventing the train from immediately unblocking and moving if the throttle was already past the resume threshold at connect time
+- Extracted shared applyStopMode() function used by both the stop button and the connect path, ensuring identical stop-mode and unblock behaviour in both cases; also plays the brake sound on connect as audible confirmation
+- Fixed stop button double-press bug: pressing stop again while already blocked no longer resets speedAtBlock to 0, which previously caused the train to immediately resume
+- Added throttle block on initial BLE connection so the train stays still regardless of throttle position until the user moves it past the unblock threshold
+- Increased STOP_UNBLOCK_THRESHOLD by 10% (20 → 22) for safer resume behavior
+
 ## [v1.0.0] - 2026-02-21
 - Refactored monolithic main.cpp into separate modules: config.h, pins.h, power.h/.cpp, train_control.h/.cpp, buttons.h/.cpp
 - Moved all tunable #define constants into include/config.h for single-file configuration

@@ -6,7 +6,7 @@
 #define POT_MAX              2300   // ADC value when handle is fully BACKWARD
 #define POT_REVERSED         false  // Set to true if potentiometer GND/VCC are swapped
 #define SPEED_MIN            20     // Minimum motor speed (both directions); range: SPEED_MIN..64
-#define STOP_UNBLOCK_THRESHOLD 20   // speed-unit change needed to resume after emergency stop
+#define STOP_UNBLOCK_THRESHOLD 22   // speed-unit change needed to resume after emergency stop
 
 // Inactivity auto-off configuration
 #define INACTIVITY_TIMEOUT_MS  (10UL * 60UL * 1000UL)  // 10 minutes

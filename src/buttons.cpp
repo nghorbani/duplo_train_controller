@@ -48,12 +48,7 @@ void handleButtons() {
     if (pbStop.update()) {
         if (pbStop.fell()) {
             resetActivityTimer();
-            potBlocked = true;
-            speedAtBlock = gSpeed;
-            gSpeed = 0;
-            myHub.setBasicMotorSpeed(port, 0);
-            delay(100);
-            myHub.playSound((byte)DuploTrainBaseSound::BRAKE);
+            applyStopMode();
         }
     }
 }

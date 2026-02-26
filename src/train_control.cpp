@@ -64,6 +64,21 @@ static bool checkPotUnblock(int speed) {
     return true;  // still blocked
 }
 
+void applyStopMode() {
+    if (!potBlocked) {
+        // Capture current throttle position so the unblock threshold is measured
+        // from where the throttle actually is, not from a hardcoded 0.
+        potReader.update();
+        PotReading r = readAndNormalizePot();
+        speedAtBlock = r.speed;
+    }
+    potBlocked = true;
+    gSpeed = 0;
+    myHub.setBasicMotorSpeed(port, 0);
+    delay(100);
+    myHub.playSound((byte)DuploTrainBaseSound::BRAKE);
+}
+
 static const char* sendMotorCommand(int speed, unsigned long now) {
     if (speed != gSpeed) {
         if (gSpeed == 0 && speed > 0) {

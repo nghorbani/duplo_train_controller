@@ -5,4 +5,5 @@ extern int gSpeed;
 extern bool potBlocked;
 extern int speedAtBlock;
 
+void applyStopMode();
 void handlePoti();
